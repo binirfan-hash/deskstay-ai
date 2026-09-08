@@ -1,26 +1,424 @@
+/* ============================================================
+   Buzzbnb — Tailwind v4 @theme block
+   Pasted from collab/specs/theme.css (designer-owned spec) plus
+   designer additions: shimmer keyframes, scrollbar styling, and
+   font-wiring notes. Dark-first (no light mode).
+   Anchors: bg #141211 (oklch .184/.004/48.5)
+            accent #8fa68e (oklch .700/.043/144)
+            text #f5f0eb (oklch .9576/.0086/67.7)
+
+   FONTS — wired in src/app/layout.tsx via next/font/google:
+     Inter    -> CSS var "--font-inter"    (UI + body; consumed by --font-sans)
+     Fraunces -> CSS var "--font-fraunces" (display: wordmark, listing titles,
+                                              prices; consumed by --font-display)
+   The variables are attached to <html> in layout.tsx. If they are ever
+   removed, type falls back to the system stacks declared below.
+   ============================================================ */
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* ---------- fonts (wire via next/font: --font-inter / --font-fraunces on <html>) ---------- */
+  --font-sans: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  /* ---------- neutral scale — warm grey-brown, hue 48.5 ---------- */
+  --color-neutral-50: oklch(0.965 0.003 48.5);  /* #f5f3f2 */
+  --color-neutral-100: oklch(0.938 0.003 48.5); /* #eceae9 — elevated card bg */
+  --color-neutral-150: oklch(0.872 0.004 48.5); /* #d7d4d2 */
+  --color-neutral-200: oklch(0.760 0.004 48.5); /* #b3b0af — secondary text */
+  --color-neutral-300: oklch(0.610 0.004 48.5); /* #858281 — placeholder */
+  --color-neutral-400: oklch(0.440 0.004 48.5); /* #545251 — disabled fill */
+  --color-neutral-500: oklch(0.320 0.004 48.5); /* #353231 — input fill */
+  --color-neutral-600: oklch(0.245 0.004 48.5); /* #22201f — sunken bg / subtle border */
+  --color-neutral-700: oklch(0.196 0.003 48.5); /* #161514 — card surface */
+  --color-neutral-800: oklch(0.184 0.004 48.5); /* #141211 — PAGE BACKGROUND (brand) */
+  --color-neutral-900: oklch(0.130 0.003 48.5); /* #080706 — price pill / wells */
+  --color-neutral-950: oklch(0.085 0.003 48.5); /* #020202 — shadow tint */
+
+  /* ---------- accent scale — sage/moss, hue 144 ---------- */
+  --color-accent-50: oklch(0.972 0.029 144);    /* #ebfbea */
+  --color-accent-100: oklch(0.940 0.035 144);   /* #def2dd — links/chip text */
+  --color-accent-200: oklch(0.884 0.043 144);   /* #c8e1c7 — price text, dot fill */
+  --color-accent-300: oklch(0.812 0.043 144);   /* #b1c9b0 — secondary btn bg, links */
+  --color-accent-400: oklch(0.752 0.043 144);   /* #9fb69e — focus ring, hovers */
+  --color-accent-500: oklch(0.700 0.043 144);   /* #8fa68e — BRAND ACCENT */
+  --color-accent-600: oklch(0.622 0.043 144);   /* #788e77 — borders */
+  --color-accent-700: oklch(0.528 0.043 144);   /* #5c725c — chip bg, icon buttons */
+  --color-accent-800: oklch(0.430 0.043 144);   /* #425641 — chip bg, scrim */
+  --color-accent-900: oklch(0.340 0.043 144);   /* #2a3e2a */
+  --color-accent-950: oklch(0.245 0.039 144);   /* #142514 */
+
+  /* ---------- danger — the only exception hue (warm red, H 27.7) ---------- */
+  --color-danger-400: oklch(0.721 0.107 27.2);  /* #e08a80 — danger text on dark */
+  --color-danger-500: oklch(0.654 0.125 27.7);  /* #d27065 — destructive solid */
+  --color-danger-600: oklch(0.580 0.124 27.7);  /* #b85a50 — destructive hover */
+
+  /* ---------- semantic aliases (components consume these) ---------- */
+  --color-page: oklch(0.184 0.004 48.5);        /* page background */
+  --color-surface: oklch(0.196 0.003 48.5);     /* card surface */
+  --color-elevated: oklch(0.938 0.003 48.5);    /* elevated card */
+  --color-ink: oklch(0.9576 0.0086 67.7);       /* brand text #f5f0eb */
+  --color-ink-secondary: oklch(0.760 0.004 48.5);
+  --color-ink-muted: oklch(0.66 0.004 48.5); /* lifted from .610: ≥4.5:1 on card surfaces (was 4.26) */
+  --color-brand: oklch(0.700 0.043 144);
+  --color-brand-hover: oklch(0.752 0.043 144);
+  --color-brand-ink: oklch(0.184 0.004 48.5);   /* text on accent-500 */
+  --color-brand-border: oklch(0.622 0.043 144);
+  --color-ring: oklch(0.752 0.043 144);
+
+  /* ---------- typography scale (dense line-heights) ---------- */
+  --text-xs: 0.75rem;   --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;    --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;  --text-lg--line-height: 1.625rem;
+  --text-xl: 1.25rem;   --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;   --text-2xl--line-height: 1.875rem;
+  --text-3xl: 1.875rem; --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.25rem;  --text-4xl--line-height: 2.5rem;
+  --text-price: 1.75rem;      --text-price--line-height: 2rem;   --text-price--font-weight: 600;
+  --text-price--font-family: var(--font-display);
+  --text-logo: 1.375rem;      --text-logo--line-height: 1.625rem; --text-logo--font-weight: 600;
+  --text-logo--font-family: var(--font-display);
+
+  /* ---------- spacing (4px base unchanged; dense named steps) ---------- */
+  --spacing: 0.25rem;
+  --spacing-card-gap: 1rem;       /* listing grid gap 16px */
+  --spacing-section-gap: 1.5rem;  /* between sections 24px */
+  --spacing-navbar-h: 3.5rem;     /* 56px */
+  --spacing-chip-h: 2rem;         /* 32px */
+  --spacing-control-h: 2.5rem;    /* 40px buttons/inputs */
+  --spacing-content-max: 80rem;   /* 1280px container */
+
+  /* ---------- radius ---------- */
+  --radius-sm: 0.375rem;   /* badges, dots */
+  --radius-md: 0.625rem;   /* inputs, chips, buttons */
+  --radius-lg: 0.875rem;   /* cards, modals */
+  --radius-xl: 1.25rem;    /* hero media */
+
+  /* ---------- shadows (warm-tinted from #020202, never blue-black) ---------- */
+  --shadow-card: 0 1px 2px rgb(2 2 2 / 0.4), 0 2px 8px rgb(2 2 2 / 0.25);
+  --shadow-pop: 0 4px 16px rgb(2 2 2 / 0.45);
+  --shadow-modal: 0 8px 32px rgb(2 2 2 / 0.6);
+  --shadow-glow: 0 0 0 1px rgb(143 166 142 / 0.35), 0 0 16px rgb(143 166 142 / 0.15);
+
+  /* ---------- motion ---------- */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-duration-fast: 120ms;
+  --animate-duration-base: 200ms;
+  --animate-duration-slow: 320ms;
+
+  /* skeleton shimmer (designer addition — consumed by <Skeleton />) */
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+
+  /* ---------- z-index ---------- */
+  --z-navbar: 40;
+  --z-dropdown: 50;
+  --z-modal: 60;
+  --z-toast: 70;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ============================================================
+   Base — dark-first page defaults
+   ============================================================ */
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: oklch(0.700 0.043 144 / 0.35);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+  /* tabular numerals wherever prices/counts render */
+  .tnum, input[type="date"], input[type="number"] {
+    font-variant-numeric: tabular-nums;
+  }
+  /* kill default-blue autofill + selection in WebKit */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--color-neutral-500) inset;
+    -webkit-text-fill-color: var(--color-ink);
+    caret-color: var(--color-ink);
+    transition: background-color 9999s ease-out;
+  }
+  /* scrollbars — warm neutral, thin (Firefox + WebKit) */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-neutral-400) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-neutral-400);
+    border-radius: 9999px;
+    border: 2px solid var(--color-page);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-accent-700);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   Component recipes — @utility so they compose with variants
+   (hover:, focus-visible:, disabled:) and stay tree-shakeable.
+   React components in src/components/{ui,layout,listing} are
+   self-contained; these utilities back the class registry in
+   collab/design-tokens.md §7 for page-level composition.
+   ============================================================ */
+
+/* ---------- card (listing card) ---------- */
+@utility card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-neutral-600);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: box-shadow var(--animate-duration-base) var(--ease-out-soft),
+              transform var(--animate-duration-base) var(--ease-out-soft),
+              border-color var(--animate-duration-base) var(--ease-out-soft);
+}
+@utility card-hover {
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-pop);
+    border-color: var(--color-brand-border);
+  }
+}
+
+/* ---------- chip (category filter) ---------- */
+@utility chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--spacing-chip-h);
+  padding-inline: 0.875rem;
+  border-radius: 9999px;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  white-space: nowrap;
+  /* accent-600 bg + brand-ink text = 4.77:1 (accent-800/accent-100 was 2.67:1) */
+  background-color: var(--color-accent-600);
+  color: var(--color-brand-ink);
+  border: 1px solid var(--color-accent-700);
+  transition: background-color var(--animate-duration-base) var(--ease-out-soft),
+              color var(--animate-duration-base) var(--ease-out-soft);
+}
+@utility chip-hover {
+  &:hover:not(:disabled) {
+    background-color: var(--color-accent-500);
+    color: var(--color-brand-ink);
+  }
+}
+@utility chip-selected {
+  background-color: var(--color-accent-500);
+  color: var(--color-brand-ink);
+  border-color: var(--color-accent-500);
+  font-weight: 600;
+}
+@utility chip-disabled {
+  background-color: var(--color-neutral-500);
+  color: var(--color-neutral-300);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+/* ---------- button ---------- */
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: var(--spacing-control-h);
+  padding-inline: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--animate-duration-fast) var(--ease-out-soft),
+              border-color var(--animate-duration-fast) var(--ease-out-soft),
+              color var(--animate-duration-fast) var(--ease-out-soft);
+}
+@utility btn-disabled {
+  &:disabled {
+    background-color: var(--color-neutral-500);
+    color: var(--color-neutral-300);
+    border-color: transparent;
+    cursor: not-allowed;
+  }
+}
+@utility btn-primary {
+  background-color: var(--color-accent-500);
+  color: var(--color-brand-ink);
+  border: 1px solid transparent;
+}
+@utility btn-primary-hover {
+  &:hover:not(:disabled) { background-color: var(--color-accent-400); }
+  &:active:not(:disabled) { background-color: var(--color-accent-600); }
+}
+@utility btn-secondary {
+  background-color: transparent;
+  color: var(--color-accent-300);
+  border: 1px solid var(--color-brand-border);
+}
+@utility btn-secondary-hover {
+  &:hover:not(:disabled) { background-color: var(--color-neutral-900); }
+}
+@utility btn-ghost {
+  background-color: transparent;
+  color: var(--color-ink-secondary);
+  border: 1px solid transparent;
+}
+@utility btn-ghost-hover {
+  &:hover:not(:disabled) { background-color: var(--color-neutral-700); }
+}
+@utility btn-danger {
+  background-color: var(--color-danger-500);
+  color: var(--color-brand-ink);
+  border: 1px solid transparent;
+}
+@utility btn-danger-hover {
+  &:hover:not(:disabled) { background-color: var(--color-danger-600); }
+}
+
+/* ---------- input ---------- */
+@utility input {
+  height: var(--spacing-control-h);
+  width: 100%;
+  padding-inline: 0.75rem;
+  background-color: var(--color-neutral-500);
+  border: 1px solid var(--color-neutral-600);
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  &::placeholder { color: var(--color-ink-muted); }
+  &:focus {
+    outline: none;
+    border-color: var(--color-accent-500);
+    box-shadow: 0 0 0 3px oklch(0.752 0.043 144 / 0.4);
+  }
+}
+@utility input-error {
+  border-color: var(--color-danger-400);
+}
+
+/* ---------- badge ---------- */
+@utility badge {
+  display: inline-flex;
+  align-items: center;
+  height: 1.375rem; /* 22px */
+  padding-inline: 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+@utility badge-sage   { background-color: var(--color-accent-600); color: var(--color-brand-ink); }
+@utility badge-outline { border: 1px solid var(--color-brand-border); color: var(--color-accent-300); }
+@utility badge-danger { background-color: var(--color-danger-500); color: var(--color-brand-ink); }
+@utility badge-neutral { background-color: var(--color-neutral-600); color: var(--color-ink-secondary); }
+
+/* ---------- navbar ---------- */
+@utility navbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-navbar);
+  height: var(--spacing-navbar-h);
+  padding-inline: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgb(20 18 17 / 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-neutral-600);
+}
+@utility navbar-link {
+  font-size: var(--text-sm);
+  color: var(--color-ink-secondary);
+  padding-block: 0.25rem;
+  border-bottom: 2px solid transparent;
+  transition: color var(--animate-duration-fast) var(--ease-out-soft),
+              border-color var(--animate-duration-fast) var(--ease-out-soft);
+  &:hover { color: var(--color-ink); }
+}
+@utility navbar-link-active {
+  color: var(--color-accent-300);
+  border-bottom-color: var(--color-accent-500);
+}
+
+/* ---------- carousel dots ---------- */
+@utility carousel-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+@utility carousel-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: rgb(245 240 235 / 0.45);
+  transition: width var(--animate-duration-base) var(--ease-out-soft),
+              background-color var(--animate-duration-base) var(--ease-out-soft);
+}
+@utility carousel-dot-active {
+  width: 1.25rem; /* pill */
+  background-color: var(--color-ink); /* 7:1 over scrim */
+}
+@utility carousel-scrim {
+  background-image: linear-gradient(to top, oklch(0.430 0.043 144 / 0.6), transparent);
+}
+@utility carousel-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: rgb(20 18 17 / 0.65);
+  color: var(--color-ink);
+  transition: background-color var(--animate-duration-fast) var(--ease-out-soft);
+  /* hover keeps light ink readable (accent-800 was 2.73:1) */
+  &:hover { background-color: var(--color-neutral-900); }
+}
+
+/* ---------- price pill ---------- */
+@utility price-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  background-color: var(--color-neutral-900);
+  border-radius: var(--radius-md);
+  color: var(--color-accent-200);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
