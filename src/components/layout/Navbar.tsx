@@ -31,7 +31,14 @@ export async function Navbar({ children }: NavbarProps) {
   } catch {
     profile = null; // nav must render even if the session lookup fails
   }
-  const { currency } = await getCurrency();
+  // STATIC-DEMO (18 Nov 2026): cookies() throws in the static-export build
+  // scope; fall back to the server default currency so the nav still renders.
+  let currency: import("@/lib/currency").CurrencyCode;
+  try {
+    currency = (await getCurrency()).currency;
+  } catch {
+    currency = "EUR";
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-neutral-600 bg-[rgb(20_18_17/0.92)] backdrop-blur-md">

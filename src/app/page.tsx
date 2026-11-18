@@ -27,15 +27,20 @@ export const metadata: Metadata = {
   title: "DeskStay AI — remote-work-ready stays",
 };
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
-  const sp = await searchParams;
-  const filters = parseHomeFilters(sp);
-  const strings = spToStrings(sp);
-  const { currency, rates } = await getDisplayCurrency();
+export default async function HomePage() {
+  // STATIC-DEMO (18 Nov, Nadeem approved): the static host renders the
+  // default browse view (first 24 listings, no filters); searchParams and
+  // the currency cookie are request-scope and skipped at export.
+  const filters = {} as import("@/lib/searchParams").HomeFilters;
+  const strings: Record<string, string> = {};
+  const { currency, rates } = {
+    currency: "EUR" as import("@/lib/currency").CurrencyCode,
+    rates: {
+      rates: { EUR: 1, USD: 1.08, GBP: 0.85, AED: 3.97 },
+      ratesAsOf: "static-demo",
+      live: false,
+    },
+  };
 
   // Server-side filters via the data layer; price params are in euros on the
   // URL and converted to integer cents here (money is cents everywhere else).

@@ -15,9 +15,28 @@ import { getReviewsForListing } from "@/lib/data/reviews";
 import { fmtDate } from "@/lib/format";
 import { workFieldsOf } from "@/lib/deskstay";
 import { DeskStayScoreBadge } from "@/components/deskstay/WorkReadiness";
-import { getDisplayCurrency } from "@/lib/currencyServer";
 import { formatMoney } from "@/lib/currency";
-import { spToStrings, isISODate, type SearchParams } from "@/lib/searchParams";
+import { isISODate } from "@/lib/searchParams";
+
+export async function generateStaticParams() {
+  // STATIC-DEMO (18 Nov, Nadeem approved): prerender the first 30 listing
+  // detail pages for the free host; unmapped ids fall to the 404 page.
+  // Build scope has no request/cookies, so talk to Supabase directly with
+  // the anon key (read-only list query) instead of the cookie-bound client.
+  const { createClient } = await import("@supabase/supabase-js");
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return [];
+  const supabase = createClient(url, key);
+  const { data } = await supabase
+    .from("listings")
+    .select("id")
+    .order("created_at", { ascending: false })
+    .limit(30);
+  return (data ?? []).map((l) => ({ id: l.id as string }));
+}
+
+export const dynamicParams = false;
 
 /**
  * Listing detail (ux-flows §4 + DeskStay pivot): photo gallery/carousel,
@@ -37,14 +56,13 @@ export async function generateMetadata({
 
 export default async function ListingDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<SearchParams>;
 }) {
+  // STATIC-DEMO: no searchParams reads (they are request-scope); the booking
+  // widget prefills from the user's own choices instead of URL params.
   const { id } = await params;
-  const sp = await searchParams;
-  const strings = spToStrings(sp);
+  const strings: Record<string, string> = {};
 
   const res = await getListingById(id);
   if (!res.ok) {
@@ -72,7 +90,15 @@ export default async function ListingDetailPage({
   const listing = res.listing;
   const photos = listing.photos;
   const reviewsRes = await getReviewsForListing(id).catch(() => null);
-  const { currency, rates } = await getDisplayCurrency();
+  // STATIC-DEMO: no cookie reads at build - base currency it is.
+  const { currency, rates } = {
+    currency: "USD" as const,
+    rates: {
+      rates: { EUR: 1, USD: 1.08, GBP: 0.85, AED: 3.97 },
+      ratesAsOf: "static-demo",
+      live: false,
+    },
+  };
   const rate = rates.rates[currency] ?? 1;
   const work = workFieldsOf(listing);
 

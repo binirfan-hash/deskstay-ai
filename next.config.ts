@@ -17,7 +17,16 @@ const supabaseHost = (() => {
 })();
 
 const nextConfig: NextConfig = {
+  // 18 Nov 2026 (Nadeem approved): static export for the free-host demo.
+  output: "export",
+  // GitHub Pages project site: every asset lives under /deskstay-demo/.
+  basePath: "/deskstay-demo",
   images: {
+    // v2 demo mode (16 Nov 2026, Nadeem approved): serve photos straight from
+    // Supabase/picsum CDNs. The Vercel image-optimizer function was the single
+    // biggest Fluid Active-CPU burner on the Hobby free tier (120 photos x
+    // bot crawls); optimizing here is pointless for a demo app.
+    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
       ...(supabaseHost

@@ -14,7 +14,22 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * Create a NEW client per request — never cache it across requests.
  */
 export async function createClient(): Promise<SupabaseClient> {
-  const cookieStore = await cookies();
+  // STATIC-DEMO (18 Nov 2026): outside a request scope (static export build
+  // runs) `cookies()` throws - fall back to a plain anon client so the same
+  // data layer works at build time. Runtime requests behave as before.
+  let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
+  try {
+    cookieStore = await cookies();
+  } catch {
+    cookieStore = null;
+  }
+  if (!cookieStore) {
+    const { createClient: plainCreate } = await import("@supabase/supabase-js");
+    return plainCreate(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    );
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

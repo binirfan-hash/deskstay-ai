@@ -15,16 +15,11 @@ import { spToStrings, safeNextPath, type SearchParams } from "@/lib/searchParams
 export const metadata: Metadata = { title: "Log in" };
 
 export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
 }) {
-  const sp = await searchParams;
-  const strings = spToStrings(sp);
-  const nextPath = safeNextPath(strings.next);
-
-  const profile = await getCurrentProfile().catch(() => null);
-  if (profile) redirect(nextPath);
+  // STATIC-DEMO: no searchParams reads. The static host has no ?next=
+  // resume; the demo notice covers sign-in attempts.
+  const strings: Record<string, string> = {};
+  const nextPath = safeNextPath(undefined);
 
   return (
     <div className="flex min-h-screen flex-1 flex-col">
